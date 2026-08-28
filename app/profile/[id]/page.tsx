@@ -2,25 +2,25 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { auth, db } from "app/firebase/firebase";
 import { ProfileBio } from "app/components/Profile/ProfileBio";
 import { LayoutNavbar } from "app/components/Navigation/LayoutNavbar";
 import { ProfileMoviesHighlight } from "app/components/Profile/ProfileMoviesHighlight";
 import { ProfileReviews } from "app/components/Profile/ProfileReviews";
-import { User, UserFavourite, UserReview, UserWatched } from "app/types";
+import { Review, UserProfile, WatchedEntry } from "app/types";
 import { Footer } from "app/components/Navigation/Footer";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
 
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<User>({} as User);
+  const [user, setUser] = useState<UserProfile>({} as UserProfile);
   const [isAuthor, setIsAuthor] = useState(false);
 
-  const [reviews, setReviews] = useState<UserReview[]>([]);
-  const [favourites, setFavourites] = useState<UserFavourite[]>([]);
-  const [watched, setWatched] = useState<UserWatched[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [favourites, setFavourites] = useState<WatchedEntry[]>([]);
+  const [watched, setWatched] = useState<WatchedEntry[]>([]);
 
   const router = useRouter();
 
@@ -29,25 +29,37 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
     const userSnap = await getDoc(doc(db, "users", id));
     if (userSnap.exists()) {
-      const user = userSnap.data() as User;
+      const user = userSnap.data() as UserProfile;
       setUser(user);
 
-      setReviews(user.reviews.reverse().slice(0, 6));
-      setWatched(user.watched);
-      setFavourites(user.favourites);
+      await Promise.all([setMovies(), setReviewsForProfile()]);
     }
 
     setLoading(false);
   };
 
   const setMovies = async () => {
-    const userSnap = await getDoc(doc(db, "users", id));
-    if (userSnap.exists()) {
-      const user = userSnap.data() as User;
+    const watchedRef = collection(db, "users", id, "watched");
+    const [watchedSnap, favouritesSnap] = await Promise.all([
+      getDocs(watchedRef),
+      getDocs(query(watchedRef, where("liked", "==", true))),
+    ]);
+    setWatched(watchedSnap.docs
+      .map((entry) => entry.data() as WatchedEntry)
+      .sort((a, b) => b.lastWatchedAt.localeCompare(a.lastWatchedAt)));
+    setFavourites(favouritesSnap.docs
+      .map((entry) => entry.data() as WatchedEntry)
+      .sort((a, b) => b.lastWatchedAt.localeCompare(a.lastWatchedAt)));
+  };
 
-      setWatched(user.watched);
-      setFavourites(user.favourites);
-    }
+  const setReviewsForProfile = async () => {
+    const reviewsSnap = await getDocs(query(collection(db, "reviews"), where("uid", "==", id)));
+    setReviews(
+      reviewsSnap.docs
+        .map((reviewDoc) => ({ reviewId: reviewDoc.id, ...(reviewDoc.data() as Omit<Review, "reviewId">) }))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 6)
+    );
   };
 
   const onEvent = () => {
@@ -70,7 +82,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       <LayoutNavbar />
       <div className="site-body min-h-[78vh] py-5">
         <div className="flex flex-col px-4 font-['Graphik'] md:mx-auto md:my-0 md:w-[950px] md:py-8">
-          <ProfileBio user={user} isAuthor={isAuthor} />
+          <ProfileBio user={user} isAuthor={isAuthor} favouriteCount={favourites.length} watchedCount={watched.length} />
           <div className="flex flex-col gap-4 md:flex-row md:justify-between">
             <div>
               <ProfileMoviesHighlight
@@ -92,7 +104,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               />
             </div>
 
-            {user.reviews && <ProfileReviews reviews={reviews} />}
+            <ProfileReviews reviews={reviews} />
           </div>
         </div>
       </div>

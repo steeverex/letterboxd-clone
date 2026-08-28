@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { ProfileMoviePoster } from "./ProfileMoviePoster";
 import Link from "next/link";
-import { User, UserFavourite, UserWatched } from "app/types";
+import { UserProfile, WatchedEntry } from "app/types";
 
 export const ProfileMoviesHighlight = ({
   user,
@@ -13,17 +13,17 @@ export const ProfileMoviesHighlight = ({
   type,
   onEvent,
 }: {
-  user: User;
-  movies: UserFavourite[];
-  watched: UserWatched[];
-  favourites: UserFavourite[];
+  user: UserProfile;
+  movies: WatchedEntry[];
+  watched: WatchedEntry[];
+  favourites: WatchedEntry[];
   type: string;
   onEvent: () => void;
 }) => {
   const [movieIds, setMovieIds] = useState<string[]>([]);
 
-  const getLatestMovies = (movies: UserFavourite[]) => {
-    const latestMovies = movies.slice(0, 4).map((movie) => movie.movieID);
+  const getLatestMovies = (movies: WatchedEntry[]) => {
+    const latestMovies = movies.slice(0, 4).map((movie) => movie.movieId);
 
     setMovieIds(latestMovies);
   };

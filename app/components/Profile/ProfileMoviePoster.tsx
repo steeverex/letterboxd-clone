@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import FavouriteButton from "../Buttons/FavoriteButton";
 import { WatchButton } from "../Buttons/WatchButton";
-import { Movie, UserFavourite, UserWatched } from "app/types";
+import { Movie, WatchedEntry } from "app/types";
 
 export const ProfileMoviePoster = ({
   watched,
@@ -12,8 +12,8 @@ export const ProfileMoviePoster = ({
   movieId,
   onEvent,
 }: {
-  watched: UserWatched[];
-  favourites: UserFavourite[];
+  watched: WatchedEntry[];
+  favourites: WatchedEntry[];
   movieId: string;
   onEvent: () => void;
 }) => {
@@ -26,10 +26,10 @@ export const ProfileMoviePoster = ({
   const [isWatched, setIsWatched] = useState(false);
 
   const setInitialMovieStatuses = () => {
-    const isFavorite = favourites.some((movies) => movies?.movieID === movieId);
+    const isFavorite = favourites.some((movies) => movies?.movieId === movieId);
     setIsFavourite(isFavorite);
 
-    const isWatched = watched.some((movies) => movies?.movieID === movieId);
+    const isWatched = watched.some((movies) => movies?.movieId === movieId);
     setIsWatched(isWatched);
   };
 
@@ -50,7 +50,7 @@ export const ProfileMoviePoster = ({
       });
 
     setInitialMovieStatuses();
-  }, [movieId]);
+  }, [movieId, watched, favourites]);
 
   if (isLoading) return <Loader />;
 
@@ -78,14 +78,17 @@ export const ProfileMoviePoster = ({
           <FavouriteButton
             id={movie.id}
             title={movie.title}
+            poster={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
             isFavourite={isFavourite}
             setIsFavourite={setIsFavourite}
+            setIsWatched={setIsWatched}
             onEvent={onEvent}
           />
 
           <WatchButton
             id={movie.id}
             title={movie.title}
+            poster={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
             isWatched={isWatched}
             setIsWatched={setIsWatched}
             onEvent={onEvent}

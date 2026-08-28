@@ -4,10 +4,6 @@ import React from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/firebase";
 
-// When i sign in, check if user exists
-// If not, create db references and docs and collection for it like this:
-// users / displayName (name, bio, reviews, watched) /favourites (movieid, isfav) / reviews (movieid, review) /watched(movieid, iswatched)/watchlist
-
 export const SignInWithGoogle = () => {
   const signInWithGoogle = async () => {
     let provider = new GoogleAuthProvider();
@@ -41,11 +37,17 @@ export const SignInWithGoogle = () => {
     await setDoc(doc(db, "users", auth.currentUser.uid), {
       name: auth.currentUser.displayName,
       uid: auth.currentUser.uid,
+      username: (auth.currentUser.displayName || auth.currentUser.uid).toLowerCase(),
       bio: "My movie watching journey, on clonnerboxd :)",
       photoUrl: auth.currentUser.photoURL,
-      reviews: [],
-      watched: [],
-      favourites: [],
+      createdAt: new Date().toISOString(),
+      stats: {
+        watchedCount: 0,
+        reviewCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+        listCount: 0,
+      },
     }).catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;

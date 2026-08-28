@@ -20,30 +20,11 @@ export default function MoviePoster({
   const [isFavourite, setIsFavourite] = useState(false);
   const [isWatched, setIsWatched] = useState(false);
 
-  const setIsMovieFavourite = async () => {
+  const setInitialMovieStatuses = async () => {
     if (!auth || !auth.currentUser) return;
-    const userId = auth.currentUser.uid;
-    const userDoc = await getDoc(doc(db, "users", userId));
-
-    const userFavs = userDoc?.data()?.favourites;
-    const isFavorite = userFavs.some((movies) => movies?.movieID === id);
-    setIsFavourite(isFavorite);
-  };
-
-  const setIsMovieWatched = async () => {
-    if (!auth || !auth.currentUser) return;
-
-    const userId = auth.currentUser.uid;
-    const userDoc = await getDoc(doc(db, "users", userId));
-
-    const userWatched = userDoc?.data()?.watched;
-    const isWatched = userWatched.some((movies) => movies?.movieID === id);
-    setIsWatched(isWatched);
-  };
-
-  const setInitialMovieStatuses = () => {
-    setIsMovieFavourite();
-    setIsMovieWatched();
+    const watchedEntry = await getDoc(doc(db, "users", auth.currentUser.uid, "watched", id));
+    setIsWatched(watchedEntry.exists());
+    setIsFavourite(watchedEntry.data()?.liked === true);
   };
 
   useEffect(() => {
@@ -75,12 +56,15 @@ export default function MoviePoster({
           <FavouriteButton
             id={id}
             title={title}
+            poster={poster}
             isFavourite={isFavourite}
             setIsFavourite={setIsFavourite}
+            setIsWatched={setIsWatched}
           />
           <WatchButton
             id={id}
             title={title}
+            poster={poster}
             isWatched={isWatched}
             setIsWatched={setIsWatched}
           />
@@ -95,13 +79,16 @@ export default function MoviePoster({
         <FavouriteButton
           id={id}
           title={title}
+          poster={poster}
           isFavourite={isFavourite}
           setIsFavourite={setIsFavourite}
+          setIsWatched={setIsWatched}
         />
 
         <WatchButton
           id={id}
           title={title}
+          poster={poster}
           isWatched={isWatched}
           setIsWatched={setIsWatched}
         />

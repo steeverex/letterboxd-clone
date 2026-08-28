@@ -21,32 +21,11 @@ export const PopularMoviePoster = ({
   const [isFavourite, setIsFavourite] = useState(false);
   const [isWatched, setIsWatched] = useState(false);
 
-  const setIsMovieFavourite = async () => {
+  const setInitialMovieStatuses = async () => {
     if (!auth || !auth.currentUser) return;
-    const userId = auth.currentUser.uid;
-    const userDoc = await getDoc(doc(db, "users", userId));
-
-    const userFavs = userDoc?.data()?.favourites;
-    const isFavorite = userFavs.some((movies) => movies?.movieID === movie.id);
-    setIsFavourite(isFavorite);
-  };
-
-  const setIsMovieWatched = async () => {
-    if (!auth || !auth.currentUser) return;
-
-    const userId = auth.currentUser.uid;
-    const userDoc = await getDoc(doc(db, "users", userId));
-
-    const userWatched = userDoc?.data()?.watched;
-    const isWatched = userWatched.some(
-      (movies) => movies?.movieID === movie.id
-    );
-    setIsWatched(isWatched);
-  };
-
-  const setInitialMovieStatuses = () => {
-    setIsMovieFavourite();
-    setIsMovieWatched();
+    const watchedEntry = await getDoc(doc(db, "users", auth.currentUser.uid, "watched", movie.id));
+    setIsWatched(watchedEntry.exists());
+    setIsFavourite(watchedEntry.data()?.liked === true);
   };
 
   useEffect(() => {
@@ -101,12 +80,15 @@ export const PopularMoviePoster = ({
           <FavouriteButton
             id={movie.id}
             title={movie.title}
+            poster={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
             isFavourite={isFavourite}
             setIsFavourite={setIsFavourite}
+            setIsWatched={setIsWatched}
           />
           <WatchButton
             id={movie.id}
             title={movie.title}
+            poster={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
             isWatched={isWatched}
             setIsWatched={setIsWatched}
           />

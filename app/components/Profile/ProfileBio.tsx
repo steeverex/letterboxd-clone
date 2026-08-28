@@ -2,14 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import placeholder from "@/assets/sappling.jpg";
-import { User } from "app/types";
+import { UserProfile } from "app/types";
 
 export const ProfileBio = ({
   user,
   isAuthor,
+  favouriteCount,
+  watchedCount,
 }: {
-  user: User;
+  user: UserProfile;
   isAuthor: boolean;
+  favouriteCount: number;
+  watchedCount: number;
 }) => {
   return (
     <div className="mb-10 flex flex-col items-center md:flex-row md:justify-between">
@@ -51,11 +55,11 @@ export const ProfileBio = ({
       </div>
       <div className="flex p-3">
         <div className="text-p-white flex flex-col items-center justify-center px-3">
-          <h1 className=" text-2xl font-bold">{user?.favourites?.length}</h1>
+          <h1 className=" text-2xl font-bold">{favouriteCount}</h1>
           <p className=" sans-serif text-xs ">FAVOURITES</p>
         </div>
         <div className="text-p-white flex flex-col items-center justify-center border-l border-solid border-[#6677884f] px-3">
-          <h1 className="text-2xl font-bold">{user?.watched?.length}</h1>
+          <h1 className="text-2xl font-bold">{watchedCount}</h1>
           <p className="sans-serif text-xs">WATCHED</p>
         </div>
       </div>

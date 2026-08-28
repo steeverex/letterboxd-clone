@@ -1,8 +1,8 @@
 import React from "react";
 import { MovieReviewExtended } from "../Review/MovieReviewExtended";
-import { UserReview } from "app/types";
+import { Review, UserReview } from "app/types";
 
-export const ProfileReviews = ({ reviews }: { reviews: UserReview[] }) => {
+export const ProfileReviews = ({ reviews }: { reviews: (UserReview | Review)[] }) => {
   return (
     <div>
       <div className="section-heading text-sh-grey border-b-grey mx-2 mb-2 flex justify-between border-b border-solid text-xs">
