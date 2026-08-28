@@ -10,9 +10,14 @@ export const MovieReviewExtended = ({
 }) => {
   const [movie, setMovie] = useState<Movie>();
 
+  const movieId = review.movieId || review.movieID;
+  const displayTimestamp = review.createdAt || review.timestamp;
+  const displayReviewText = review.reviewText || review.review;
+
   const fetchRequestFromAPI = () => {
+    if (!movieId) return;
     fetch(
-      `https://api.themoviedb.org/3/movie/${review.movieID}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
+      `https://api.themoviedb.org/3/movie/${movieId}?api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}`
     )
       .then((response) => response.json())
       .then((movie) => {
@@ -25,7 +30,7 @@ export const MovieReviewExtended = ({
 
   useEffect(() => {
     fetchRequestFromAPI();
-  }, [review]);
+  }, [movieId]);
 
   return (
     <div className="border-b-grey flex border-b border-solid py-2">
@@ -50,10 +55,10 @@ export const MovieReviewExtended = ({
             {movie?.title}
           </Link>
         </div>
-        {review?.timestamp && (
-          <p className="text-sh-grey text-xs">{review.timestamp}</p>
+        {displayTimestamp && (
+          <p className="text-sh-grey text-xs">{displayTimestamp}</p>
         )}
-        <p className="text-sh-grey pt-2 text-sm">{review.review}</p>
+        <p className="text-sh-grey pt-2 text-sm">{displayReviewText}</p>
       </div>
     </div>
   );

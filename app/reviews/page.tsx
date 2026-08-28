@@ -35,7 +35,13 @@ export default function Page() {
       (a, b) => toDate(b?.timestamp).getTime() - toDate(a?.timestamp).getTime()
     );
 
-    const movieIds = [...new Set(reviews.map((review) => review.movieID))];
+    const movieIds: number[] = [
+      ...new Set(
+        reviews
+          .map((review) => Number(review.movieId || review.movieID))
+          .filter((id): id is number => !isNaN(id) && id > 0)
+      ),
+    ];
 
     setAllReviews(sorted);
     // initial 6 reviews
@@ -152,40 +158,44 @@ export default function Page() {
 
           {!isLoading && reviews.length && (
             <div className="infinite-scroll">
-              {reviews.map((review, i) => (
-                <div
-                  className="border-sh-grey/10 bg-review-bg/30 my-2 flex w-full justify-between gap-4 rounded-md border border-solid p-2"
-                  key={i}
-                >
-                  <MovieReviewCompact review={review} key={i} />
+              {reviews.map((review, i) => {
+                const targetMovieId = String(review.movieId || review.movieID || "");
+                const targetMovie = movieMap[Number(targetMovieId)];
+                return (
+                  <div
+                    className="border-sh-grey/10 bg-review-bg/30 my-2 flex w-full justify-between gap-4 rounded-md border border-solid p-2"
+                    key={i}
+                  >
+                    <MovieReviewCompact review={review} key={i} />
 
-                  {movieMap[review.movieID] && (
-                    <div className="flex flex-col items-end justify-end">
-                      <Link
-                        href={"/movie/" + review.movieID}
-                        className="text-sh-grey hover:text-hov-blue pb-2"
-                      >
-                        {movieMap[review.movieID].title}
-                      </Link>
-                      <Link href={"/movie/" + review.movieID}>
-                        <Image
-                          className="block max-h-[120px] max-w-[80px] rounded border"
-                          src={
-                            "https://image.tmdb.org/t/p/w500/" +
-                            movieMap[review.movieID]?.poster_path
-                          }
-                          alt={
-                            "Movie title for" + movieMap[review.movieID]?.title
-                          }
-                          height={300}
-                          width={300}
-                          loading="lazy"
-                        />
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    {targetMovie && (
+                      <div className="flex flex-col items-end justify-end">
+                        <Link
+                          href={"/movie/" + targetMovieId}
+                          className="text-sh-grey hover:text-hov-blue pb-2"
+                        >
+                          {targetMovie.title}
+                        </Link>
+                        <Link href={"/movie/" + targetMovieId}>
+                          <Image
+                            className="block max-h-[120px] max-w-[80px] rounded border"
+                            src={
+                              "https://image.tmdb.org/t/p/w500/" +
+                              targetMovie?.poster_path
+                            }
+                            alt={
+                              "Movie title for" + targetMovie?.title
+                            }
+                            height={300}
+                            width={300}
+                            loading="lazy"
+                          />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
 
               {isLoadingMoreReviews && (
                 <div className="loading-dots__wrapper">
