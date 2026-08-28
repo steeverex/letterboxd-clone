@@ -4,7 +4,28 @@ export enum PopupAction {
   REMOVED = "removed",
   SUCCESS = "success",
   ERROR = "error",
+  RATED = "rated",
+  BLOCKED = "blocked",
 }
+
+export const createRatingPopup = (title: string, action: PopupAction) => {
+  const popupAlert = document.createElement("div");
+  popupAlert.classList.add("popup");
+  if (action === PopupAction.RATED) {
+    popupAlert.innerText = `Rated ${title}!`;
+  } else if (action === PopupAction.REMOVED) {
+    popupAlert.innerText = `Removed your rating for ${title}!`;
+  } else if (action === PopupAction.BLOCKED) {
+    popupAlert.innerText = `${title} is rated or reviewed \u2014 remove that first.`;
+  } else {
+    popupAlert.innerText = `Sign in to rate films.`;
+  }
+  document.body.append(popupAlert);
+
+  setTimeout(() => {
+    popupAlert.remove();
+  }, 1000);
+};
 
 export const createFavouritePopup = (title: string, action: PopupAction) => {
   const popupAlert = document.createElement("div");

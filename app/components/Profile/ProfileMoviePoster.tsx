@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import FavouriteButton from "../Buttons/FavoriteButton";
 import { WatchButton } from "../Buttons/WatchButton";
+import { RatingInput } from "../Rating/RatingInput";
+import { WatchedRating } from "../Rating/WatchedRating";
 import { Movie, WatchedEntry } from "app/types";
 
 export const ProfileMoviePoster = ({
@@ -24,13 +26,19 @@ export const ProfileMoviePoster = ({
 
   const [isFavourite, setIsFavourite] = useState(false);
   const [isWatched, setIsWatched] = useState(false);
+  const [rating, setRating] = useState<number | null>(null);
 
   const setInitialMovieStatuses = () => {
     const isFavorite = favourites.some((movies) => movies?.movieId === movieId);
     setIsFavourite(isFavorite);
 
-    const isWatched = watched.some((movies) => movies?.movieId === movieId);
-    setIsWatched(isWatched);
+    const entry = watched.find((movies) => movies?.movieId === movieId);
+    setIsWatched(Boolean(entry));
+    setRating(
+      entry?.rating ??
+        favourites.find((movies) => movies?.movieId === movieId)?.rating ??
+        null
+    );
   };
 
   useEffect(() => {
@@ -93,6 +101,22 @@ export const ProfileMoviePoster = ({
             setIsWatched={setIsWatched}
             onEvent={onEvent}
           />
+
+          <WatchedRating
+            id={movie.id}
+            title={movie.title}
+            poster={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
+            rating={rating}
+            setRating={setRating}
+            setIsWatched={setIsWatched}
+            onEvent={onEvent}
+            size={12}
+          />
+        </div>
+      )}
+      {!isHovered && rating != null && (
+        <div className="absolute bottom-1 left-1 z-10 rounded px-1" style={{ backgroundColor: "rgba(0,0,0,0.8)" }}>
+          <RatingInput value={rating} readOnly size={10} />
         </div>
       )}
     </div>
