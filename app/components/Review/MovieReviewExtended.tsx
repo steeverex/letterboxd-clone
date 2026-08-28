@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { RatingInput } from "../Rating/RatingInput";
 import { Movie, Review, UserReview } from "app/types";
 
 export const MovieReviewExtended = ({
@@ -13,6 +14,7 @@ export const MovieReviewExtended = ({
   const movieId = review.movieId || review.movieID;
   const displayTimestamp = review.createdAt || review.timestamp;
   const displayReviewText = review.reviewText || review.review;
+  const displayRating = "rating" in review ? review.rating : null;
 
   const fetchRequestFromAPI = () => {
     if (!movieId) return;
@@ -55,6 +57,9 @@ export const MovieReviewExtended = ({
             {movie?.title}
           </Link>
         </div>
+        {displayRating != null && (
+          <RatingInput value={displayRating} readOnly size={12} />
+        )}
         {displayTimestamp && (
           <p className="text-sh-grey text-xs">{displayTimestamp}</p>
         )}

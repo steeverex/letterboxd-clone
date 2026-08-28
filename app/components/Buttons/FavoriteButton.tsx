@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import favIcon from "./fav.png";
 import removeFavIcon from "./remFav.png";
 import Image from "next/image";
@@ -15,12 +15,14 @@ export const FavouriteButton = ({ id, title, poster, isFavourite, setIsFavourite
     const watchedRef = doc(db, "users", auth.currentUser.uid, "watched", id);
     const now = new Date().toISOString();
     try {
-      await setDoc(watchedRef, isFavourite ? { liked: false } : {
+      const existing = await getDoc(watchedRef);
+      await setDoc(watchedRef, isFavourite ? { liked: false } : existing.exists() ? { liked: true } : {
         movieId: id, movieTitle: title, moviePoster: poster, firstWatchedAt: now,
         lastWatchedAt: now, watchCount: 1, liked: true, rating: null, latestReviewId: null,
       }, { merge: true });
-      setIsFavourite(!isFavourite);
-      if (!isFavourite) setIsWatched?.(true);
+      const written = await getDoc(watchedRef);
+      setIsFavourite(written.data()?.liked === true);
+      setIsWatched?.(written.exists());
       onEvent?.();
       createFavouritePopup(title, isFavourite ? PopupAction.REMOVED : PopupAction.FAVOURITE);
     } catch (err) { console.error("Error updating favourite:", err); createFavouritePopup(title, PopupAction.ERROR); }

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { auth } from "../../firebase/firebase";
 
 import Link from "next/link";
+import { RatingInput } from "../Rating/RatingInput";
 import { Review } from "app/types";
 
 export const MovieReviewCompact = ({
@@ -55,6 +56,9 @@ export const MovieReviewCompact = ({
             >
               {review.userName}
             </Link>
+            {review.rating != null && (
+              <RatingInput value={review.rating} readOnly size={12} />
+            )}
             {displayTimestamp && (
               <p className="text-sh-grey text-xs">, {displayTimestamp}</p>
             )}

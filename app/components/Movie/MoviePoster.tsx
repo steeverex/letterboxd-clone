@@ -4,6 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/firebase";
 import { WatchButton } from "../Buttons/WatchButton";
 import FavouriteButton from "../Buttons/FavoriteButton";
+import { WatchedRating } from "../Rating/WatchedRating";
 
 export default function MoviePoster({
   poster,
@@ -19,12 +20,14 @@ export default function MoviePoster({
   // @to-do create hook
   const [isFavourite, setIsFavourite] = useState(false);
   const [isWatched, setIsWatched] = useState(false);
+  const [rating, setRating] = useState<number | null>(null);
 
   const setInitialMovieStatuses = async () => {
     if (!auth || !auth.currentUser) return;
     const watchedEntry = await getDoc(doc(db, "users", auth.currentUser.uid, "watched", id));
     setIsWatched(watchedEntry.exists());
     setIsFavourite(watchedEntry.data()?.liked === true);
+    setRating(watchedEntry.data()?.rating ?? null);
   };
 
   useEffect(() => {
@@ -68,6 +71,14 @@ export default function MoviePoster({
             isWatched={isWatched}
             setIsWatched={setIsWatched}
           />
+          <WatchedRating
+            id={id}
+            title={title}
+            poster={poster}
+            rating={rating}
+            setRating={setRating}
+            setIsWatched={setIsWatched}
+          />
         </div>
       )}
 
@@ -91,6 +102,16 @@ export default function MoviePoster({
           poster={poster}
           isWatched={isWatched}
           setIsWatched={setIsWatched}
+        />
+
+        <WatchedRating
+          id={id}
+          title={title}
+          poster={poster}
+          rating={rating}
+          setRating={setRating}
+          setIsWatched={setIsWatched}
+          size={12}
         />
       </div>
     </div>
